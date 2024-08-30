@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  deposit-service-app:
+    build:
+      context: .
+    container_name: arm-credit-service
+    ports:
+      - "9091:9091"
+    restart: always
+    environment:
+      CONNECTION_URL: jdbc:postgresql://postgres:5432/credit-db
+      CONNECTION_USERNAME: postgres
+      CONNECTION_PASSWORD: postgres
+    depends_on:
+      - postgres
+
+  postgres:
+    image: 'postgres:13.8-alpine'
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: credit-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      start_period: 15s
+      timeout: 3s
+      interval: 10s
+      retries: 12
+
+volumes:
+  postgres:
